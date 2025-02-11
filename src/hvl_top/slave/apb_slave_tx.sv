@@ -62,7 +62,7 @@ class apb_slave_tx extends uvm_sequence_item;
   constraint pslverr_c2 {soft pslverr == NO_ERROR;}
 
   //To choose the randomised pslverr and prdata make choose_packet_data as high
-  constraint choose_data_packet_c3 {soft choose_packet_data==0;} 
+  constraint choose_data_packet_c3 {soft choose_packet_data==1;} 
 
   //-------------------------------------------------------
   // Externally defined Tasks and Functions

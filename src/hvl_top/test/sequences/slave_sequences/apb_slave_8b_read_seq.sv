@@ -8,6 +8,8 @@
 class apb_slave_8b_read_seq extends apb_slave_base_seq;
   `uvm_object_utils(apb_slave_8b_read_seq)
 
+  rand bit choose_packet_data_seq;
+  constraint choose_packet_data_seq_c {soft choose_packet_data_seq==1;} 
   //-------------------------------------------------------
   // Externally defined Tasks and Functions
   //-------------------------------------------------------
@@ -33,7 +35,7 @@ endfunction : new
 task apb_slave_8b_read_seq::body();
   req=apb_slave_tx::type_id::create("req");
   start_item(req);
-  if(!req.randomize())
+  if(!req.randomize() with {req.choose_packet_data == choose_packet_data_seq;})
   begin
     `uvm_error(get_type_name(),"randomization failed");
   end

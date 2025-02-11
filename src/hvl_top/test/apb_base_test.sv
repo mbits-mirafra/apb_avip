@@ -156,6 +156,7 @@ endfunction : setup_apb_slave_agent_config
 function void apb_base_test::end_of_elaboration_phase(uvm_phase phase);
   super.end_of_elaboration_phase(phase);
   uvm_top.print_topology();
+  uvm_test_done.set_drain_time(this,1000ns);
 endfunction  : end_of_elaboration_phase
 
 //--------------------------------------------------------------------------------------------
@@ -169,7 +170,7 @@ task apb_base_test::run_phase(uvm_phase phase);
 
   phase.raise_objection(this);
   super.run_phase(phase);
-  #100;
+  #10;
   phase.drop_objection(this);
 
 endtask : run_phase
