@@ -54,10 +54,6 @@ endfunction : new
 //--------------------------------------------------------------------------------------------
 function void apb_slave_monitor_proxy::build_phase(uvm_phase phase);
   super.build_phase(phase);
-
-  if(!uvm_config_db #(virtual apb_slave_monitor_bfm)::get(this,"","apb_slave_monitor_bfm",apb_slave_mon_bfm_h)) begin
-    `uvm_fatal("FATAL_SMP_MON_BFM",$sformatf("Couldn't get SLAVE_MON_BFM_H in apb_slave_monitor_proxy"));  
-  end 
 endfunction : build_phase
 
 //--------------------------------------------------------------------------------------------
@@ -69,6 +65,9 @@ endfunction : build_phase
 //--------------------------------------------------------------------------------------------
 function void apb_slave_monitor_proxy::end_of_elaboration_phase(uvm_phase phase);
   super.end_of_elaboration_phase(phase);
+  if(!uvm_config_db #(virtual apb_slave_monitor_bfm)::get(this,"",$sformatf("apb_slave_monitor_bfm_%0d",apb_slave_agent_cfg_h.slave_id),apb_slave_mon_bfm_h)) begin
+    `uvm_fatal("FATAL_SMP_MON_BFM",$sformatf("Couldn't get SLAVE_MON_BFM_H in apb_slave_monitor_proxy"));  
+  end 
   apb_slave_mon_bfm_h.apb_slave_mon_proxy_h = this;
 endfunction : end_of_elaboration_phase
 

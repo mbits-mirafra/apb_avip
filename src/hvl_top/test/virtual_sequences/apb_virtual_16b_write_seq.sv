@@ -47,7 +47,7 @@ task apb_virtual_16b_write_seq::body();
   apb_slave_16b_write_seq_h = apb_slave_16b_write_seq::type_id::create("apb_slave_16b_write_seq_h");
   fork
     forever begin
-      apb_slave_16b_write_seq_h.start(p_sequencer.apb_slave_seqr_h);
+      apb_slave_16b_write_seq_h.start(p_sequencer.apb_slave_seqr_h[0]);
     end
   join_none
   

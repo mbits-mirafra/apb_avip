@@ -13,7 +13,7 @@
 ../../src/hvl_top/test/sequences/slave_sequences/apb_slave_seq_pkg.sv
 ../../src/hvl_top/env/apb_env_pkg.sv
 ../../src/hvl_top/test/virtual_sequences/apb_virtual_seq_pkg.sv
-../../src/hvl_top/test/apb_base_test_pkg.sv
+../../src/hvl_top/test/apb_test_pkg.sv
 ../../src/hdl_top/apb_if/apb_if.sv
 ../../src/hdl_top/master_agent_bfm/apb_master_driver_bfm.sv
 ../../src/hdl_top/master_agent_bfm/apb_master_monitor_bfm.sv

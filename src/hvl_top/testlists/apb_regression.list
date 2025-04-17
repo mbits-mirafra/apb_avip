@@ -9,7 +9,7 @@ apb_24b_write_test
 apb_32b_write_test
 
 # Read Tests
-# apb_8b_read_test
+apb_8b_read_test
 
 # Write-Read Tests
-# apb_8b_write_read_test
+apb_8b_write_read_test

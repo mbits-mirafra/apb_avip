@@ -13,7 +13,7 @@ import apb_global_pkg::*;
 //--------------------------------------------------------------------------------------------
 interface apb_slave_monitor_bfm (input bit pclk,
                                  input bit preset_n,
-                                 input logic [NO_OF_SLAVES-1:0]psel,
+                                 input logic psel,
                                  input bit [2:0]pprot,
                                  input bit pslverr,
                                  input bit pready,
@@ -71,19 +71,19 @@ interface apb_slave_monitor_bfm (input bit pclk,
   task sample_data (output apb_transfer_char_s apb_data_packet, input apb_transfer_cfg_s apb_cfg_packet);
     @(negedge pclk);
     
-    while(psel[apb_cfg_packet.slave_id] === 1'bX) begin
+    while(psel === 1'bX) begin
       @(negedge pclk);
       `uvm_info(name, $sformatf("Inside while loop PSEL"), UVM_HIGH)
     end
 
-    while(psel[apb_cfg_packet.slave_id] !==1 || penable !==1 || pready !==1) begin
-    `uvm_info(name, $sformatf("Inside while loop: SLAVE[%0d] penable =%0d, pready=%0d, psel=%0d ", 
+    while(psel !==1 || penable !==1 || pready !==1) begin
+    `uvm_info(name, $sformatf("Inside while loop: SLAVE[%0d] penable =%0d, pready=%0d, psel=%0b ", 
                               apb_cfg_packet.slave_id, penable, pready, psel), UVM_HIGH)
       @(negedge pclk);
     end
     `uvm_info(name, $sformatf("After while loop: penable =%0d, pready=%0d, psel=%0d ", penable, pready, psel), UVM_HIGH)
 
-    apb_data_packet.pselx[0] = psel[apb_cfg_packet.slave_id];
+    apb_data_packet.pselx[0] = psel;
     apb_data_packet.pslverr  = pslverr;
     apb_data_packet.pprot    = pprot;
     apb_data_packet.pwrite   = pwrite;

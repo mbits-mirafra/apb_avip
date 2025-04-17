@@ -1,11 +1,11 @@
-`ifndef APB_BASE_TEST_PKG_INCLUDED_
-`define APB_BASE_TEST_PKG_INCLUDED_
+`ifndef APB_TEST_PKG_INCLUDED_
+`define APB_TEST_PKG_INCLUDED_
 
 //-----------------------------------------------------------------------------------------
 // Package: apb base_test
 //  Includes all the files written to run the simulation
 //--------------------------------------------------------------------------------------------
-package apb_base_test_pkg;
+package apb_test_pkg;
 
   //-------------------------------------------------------
   // Import uvm package
@@ -35,8 +35,9 @@ package apb_base_test_pkg;
   `include "apb_24b_write_test.sv"
   `include "apb_8b_read_test.sv"
   `include "apb_32b_write_test.sv"
+  `include "apb_32b_write_multiple_slave_test.sv"
 
-endpackage : apb_base_test_pkg
+endpackage : apb_test_pkg
 
 `endif
 

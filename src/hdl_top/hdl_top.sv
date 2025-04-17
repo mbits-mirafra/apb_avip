@@ -56,6 +56,7 @@ module hdl_top;
   //-------------------------------------------------------
   // APB Interface Instantiation
   //-------------------------------------------------------
+  apb_if intf_s[NO_OF_SLAVES](pclk,preset_n);
   apb_if intf(pclk,preset_n);
 
   //-------------------------------------------------------
@@ -63,13 +64,54 @@ module hdl_top;
   //-------------------------------------------------------
   apb_master_agent_bfm apb_master_agent_bfm_h(intf); 
   
+  always_comb begin
+    case(intf.pselx)
+      2'b01: begin
+               intf_s[0].pselx   = intf.pselx[0];
+               intf_s[0].penable = intf.penable;
+               intf_s[0].paddr   = intf.paddr;
+               intf_s[0].pwrite  = intf.pwrite;
+               intf_s[0].pstrb   = intf.pstrb;
+               intf_s[0].pwdata  = intf.pwdata;
+               intf_s[0].pprot   = intf.pprot;
+               intf.pready  = intf_s[0].pready;
+               intf.prdata  = intf_s[0].prdata;
+               intf.pslverr = intf_s[0].pslverr;
+             end
+     //-------------------------------------------------------------------------------------------
+     //whenever you require multiple slaves like 2 slave then uncomment below case
+     //So if you uncomment then case 1 and case 2 will select particular slave
+     //As of now using single slave and connected using case 1
+     //Change NO_OF_SLAVES 1 to 2 inside the global pkg then you will get 2 slave interface handle
+     //-------------------------------------------------------------------------------------------
+     // 2'b10: begin
+     //          intf_s[1].pselx = intf.pselx[1];
+     //          intf_s[1].penable = intf.penable;
+     //          intf_s[1].paddr   = intf.paddr;
+     //          intf_s[1].pwrite  = intf.pwrite;
+     //          intf_s[1].pstrb   = intf.pstrb;
+     //          intf_s[1].pwdata  = intf.pwdata;
+     //          intf_s[1].pprot   = intf.pprot;
+     //          intf.pready  = intf_s[1].pready;
+     //          intf.prdata  = intf_s[1].prdata;
+     //          intf.pslverr = intf_s[1].pslverr;
+     //        end
+      default : begin
+                  intf_s[0].pselx   = 'b0;
+                  intf_s[0].penable = 'b0;
+                  //intf_s[1].pselx   = 'b0;
+                  //intf_s[1].penable = 'b0;
+                end
+    endcase
+  end
+
   //-------------------------------------------------------
   // APB Slave BFM Agent Instantiation
   //-------------------------------------------------------
   genvar i;
   generate
     for (i=0; i < NO_OF_SLAVES; i++) begin : apb_slave_agent_bfm
-      apb_slave_agent_bfm #(.SLAVE_ID(i)) apb_slave_agent_bfm_h(intf);
+      apb_slave_agent_bfm #(.SLAVE_ID(i)) apb_slave_agent_bfm_h(intf_s[i]);
       defparam apb_slave_agent_bfm[i].apb_slave_agent_bfm_h.SLAVE_ID = i;
     end
   endgenerate

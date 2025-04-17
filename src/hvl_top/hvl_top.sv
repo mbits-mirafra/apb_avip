@@ -11,7 +11,7 @@ module hvl_top;
   // Importing UVM Package and test Package
   //-------------------------------------------------------
   import uvm_pkg::*;
-  import apb_base_test_pkg::*;
+  import apb_test_pkg::*;
   
   //-------------------------------------------------------
   // Calling run_test for simulation

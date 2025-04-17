@@ -45,7 +45,7 @@ task apb_virtual_vd_vws_seq::body();
   apb_slave_vd_vws_seq_h = apb_slave_vd_vws_seq::type_id::create("apb_slave_vd_vws_seq_h");
   fork
     forever begin
-      apb_slave_vd_vws_seq_h.start(p_sequencer.apb_slave_seqr_h);
+      apb_slave_vd_vws_seq_h.start(p_sequencer.apb_slave_seqr_h[0]);
     end
   join_none
   repeat(1) begin

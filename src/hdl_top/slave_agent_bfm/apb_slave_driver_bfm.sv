@@ -13,7 +13,7 @@ import apb_global_pkg::*;
 //--------------------------------------------------------------------------------------------
 interface apb_slave_driver_bfm (input bit pclk,
                                input bit preset_n,
-                               input bit [NO_OF_SLAVES-1:0]psel,
+                               input bit psel,
                                input logic penable,
                                input logic [ADDRESS_WIDTH-1:0]paddr,
                                input logic pwrite,
@@ -81,7 +81,7 @@ interface apb_slave_driver_bfm (input bit pclk,
     // MSHA:   @(posedge pclk);
     // MSHA: end
     
-    while(psel[0] !==1) begin
+    while(psel !==1) begin
       `uvm_info(name, $sformatf("Inside while loop: penable =%0d, pready=%0d, psel=%0d ", penable, pready, psel), UVM_HIGH)
       @(negedge pclk);
     end
