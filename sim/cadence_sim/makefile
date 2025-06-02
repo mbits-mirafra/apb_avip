@@ -38,60 +38,58 @@
 # In this case, usage will be executed
 # Usage
 usage:
-	echo "";
-	echo "-----------------------------------------------------------------";
-	echo "------------------------- Usage ---------------------------------";
-	echo "";
-	echo "make target <options> <variable>=<value>";
-	echo "";
-	echo "To compile use:"
-	echo "make compile";
-	echo "";
-	echo "To simulate use:"
-	echo "make simulate test=<test_name> uvm_verbosity=<VERBOSITY_LEVEL>";
-	echo "";
-	echo "Example:":
-	echo "make simulate test=base_test uvm_verbosity=UVM_HIGH";
-	echo "";
-	echo "-----------------------------------------------------------------";
-	echo "-----------------------------------------------------------------";
-	echo "";
+	@echo "";
+	@echo "-----------------------------------------------------------------";
+	@echo "------------------------- Usage ---------------------------------";
+	@echo "";
+	@echo "make target <options> <variable>=<value>";
+	@echo "";
+	@echo "To compile use:"
+	@echo "make compile";
+	@echo "";
+	@echo "To simulate use:"
+	@echo "make simulate test=<test_name> uvm_verbosity=<VERBOSITY_LEVEL>";
+	@echo "";
+	@echo "Example:":
+	@echo "make simulate test=base_test uvm_verbosity=UVM_HIGH";
+	@echo "";
+	@echo "-----------------------------------------------------------------";
+	@echo "-----------------------------------------------------------------";
+	@echo "";
+	@echo "To run regression:"
+	@echo "make regression testlist_name=<regression_testlist_name.list>";
+	@echo "";
+	@echo "Example:":
+	@echo "make regression testlist_name=apb_regression.list";
+	@echo "";
 
 all:
-	make clean; make compile; make simulate;
+	make clean_compile; make compile; make simulate;
 
-# TODO(mshariff):
-# Need some work to point to the
-# dir:
-#     mkdir -p logfiles_and_waveforms
+clean_compile: 
+	rm -rf *_compile.log *_compile.history xcelium.d
 
-# For Assertions use +acc options
+clean_simulate:
+	rm -rf *_test cov_work
+
+
 compile:
 	make clean_compile;
 
-	# For Xcelium
-	# xrun -c
-	# -xmlibdirname INCA_libs \
-		#
-	# If not given this then the tool will use the default
-	# installation of UVM library
-	# -uvmhome $(UVMHOME) \
-
-	irun -c \
-		-clean \
-		-elaborate \
-		-coverage a \
-		-access +rwc \
-		-64 \
-		-sv \
-		-uvm \
-		+access+rw \
-		-f ../apb_compile.f \
-		-l apb_compile.log \
-		-top worklib.hdl_top:sv \
-		-top worklib.hvl_top:sv \
-		-nclibdirname INCA_libs \
-		-SVA
+	xrun -c \
+	-elaborate \
+	-access +rwc \
+	-64 \
+	-sv \
+	-uvm \
+	+access+rw \
+	-f ../apb_compile.f \
+  -access +r +vcd \
+	-l apb_compile.log \
+	-top work.hvl_top ../../src/hvl_top/hvl_top.sv \
+	-top work.hdl_top ../../src/hdl_top/hdl_top.sv \
+	-coverage all \
+	-sva 
 
 	# -s means silent mode
 	#  The command executed along with the output will be displayed on the terminal
@@ -102,79 +100,55 @@ compile:
 
 # Setting a default test as base_test
 ifndef test
-override test = apb_base_test
+override test := apb_base_test
+endif
+
+ifndef test_folder
+override test_folder := $(test)
 endif
 
 # Setting the default uvm_verbosity to UVM_MEDIUM
 ifndef uvm_verbosity
-override uvm_verbosity = UVM_MEDIUM
+override uvm_verbosity := UVM_MEDIUM
+endif
+
+ifndef seed
+override seed = random
 endif
 
 simulate:
-	echo "Inside simulate"
-	make clean_simulate
-	mkdir $(test)
+	mkdir $(test_folder)
 
-	irun -R \
-		-licqueue \
-		-64 \
-		-l $(test)/$(test).log \
-		+UVM_TESTNAME=$(test) \
-		+UVM_VERBOSITY=$(uvm_verbosity) \
-		-input shm.tcl \
-		-nclibdirname INCA_libs
+	xrun -R \
+	-64 \
+	-sv \
+	-uvm \
+  +sv_seed=$(seed) \
+	+UVM_TESTNAME=$(test) \
+	+UVM_VERBOSITY=$(uvm_verbosity) \
+	-l $(test_folder)/$(test).log \
+	-coverage all \
+	-covoverwrite \
+	-covtest $(test_folder)/ \
+  +plusarg_ignore \
 
-	#-seed random
-	#-write_metrics \
-		#-covfile coverage_config_file \
-		#-covdut hdl_top \
-		#-uvm \
-		#-coverage All
-
+	mv *.vcd $(test_folder)/$(test).vcd
+	# For checking and reporting simulation errors
 	make simulate_war_err
 
-	# `ifdef VCD_ON
-	# $dumpfile("fpga_top.vcd");
-	# $dumpvars(0, tb_fpga);
-	# `endif
-	#
-	# `ifdef QUESTA
-	#   $wlfdumpvars(0);
-	# `else
-	#   `ifdef WAVES_OFF
-	#   `else
-	#     $shm_open("waves.shm");
-	#     $shm_probe("AS");
-	#   `endif
-	# `endif
-	#
+## For Regression and coverage merge
+regression:
+	#Run compilation
+	make compile
+	#Run simualtion - regression
+	python regression_handling.py $(testlist_name)
+	#	# Get the tests from regression list
+	#	Merge coverage
+	#make merge_cov_report
+ ## make clean
 
-	# To open the waveform use the below command
-	# vsim -view waveform.wlf &
-	#
-	# To open the wavefrom with saved signals
-	# vsim -view waveform.wlf -do apb_waves.do &
-	#
-	# Coverage
-	# 1) cov_work_paths.txt - Has the path for the coverage files (path consisting of cov_work/scope/test
-	# 2) merge_cov.cmd - Has the below contents
-	#    merge -out all_cov_merge -overwrite -runfile cov_work_paths.txt -message 1 -initial_model union_all
-	#    load -run cov_work/scope/all_cov_merge
-	#    report_metrics -out report_s -detail -metrics all
-	#    OR
-	#    merge -out all_cov_merge -overwrite -runfile cov_work_paths.txt -message 1 -initial_model union_all -out $(merge_dir)
-	#    load -run cov_work/scope/$(merge_dir)
-	#    report_metrics -out report_s -detail -metrics toggle -inst fpga_top
-	# 3) imc -exec merge_cov.cmd
-	#
 
-clean_simulate:
-	rm -rf *_test cov_work
-
-clean_compile:
-	rm -rf INCA_libs *_compile.log *_compile.history
-
-clean:
+clean_all:
 	make clean_compile
 	make clean_simulate
 
@@ -183,9 +157,9 @@ compile_war_err:
 	echo "-----------------------------------------------------------------";
 	echo "------------------- Compilation Report --------------------------";
 	echo "";
-	grep "*W" apb_compile.log;
+	grep "** " apb_compile.log;
 	echo "";
-	grep "*E" apb_compile.log;
+	grep "*Error" apb_compile.log;
 	echo "";
 	echo "Log file path: apb_compile.log"
 	echo "";
@@ -199,22 +173,22 @@ simulate_war_err:
 	echo "-------------------- Simulation Report --------------------------";
 	echo "";
 	echo "Simulator Errors";
-	grep "\*E" $(test)/$(test).log;
-	echo "";
-	grep "\*F" $(test)/$(test).log;
+	grep "Error" $(test_folder)/$(test).log;
 	echo "";
 	echo "UVM Fatal";
-	grep "UVM_FATAL" $(test)/$(test).log;
+	grep "UVM_FATAL" $(test_folder)/$(test).log;
 	echo "";
 	echo "UVM Errors";
-	grep "UVM_ERROR" $(test)/$(test).log;
+	grep "UVM_ERROR" $(test_folder)/$(test).log;
 	echo "";
 	echo "UVM Warnings";
-	grep "UVM_WARNING" $(test)/$(test).log;
+	grep "UVM_WARNING" $(test_folder)/$(test).log;
 	echo "";
 	echo "Testname: $(test)"
-	echo "Log file path: $(test)/$(test).log"
-	echo "Waveform: simvision waves.shm/"
+	echo "";
+	echo "Log file path: $(test_folder)/$(test).log"
+	echo "";
+	echo "Waveform: simvision $(test_folder)/$(test).vcd &"
 	echo "";
 	echo "-----------------------------------------------------------------";
 	echo "-----------------------------------------------------------------";

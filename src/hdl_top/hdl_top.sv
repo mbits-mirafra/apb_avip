@@ -53,6 +53,10 @@ module hdl_top;
     preset_n = 1'b1;
   end
 
+  initial begin
+    $dumpfile("waveform.vcd");      // name of the VCD file
+    $dumpvars(0,hdl_top);    // dump variables from the testbench top
+  end
   //-------------------------------------------------------
   // APB Interface Instantiation
   //-------------------------------------------------------
